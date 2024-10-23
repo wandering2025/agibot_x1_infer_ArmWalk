@@ -395,11 +395,11 @@ DcuDriverModule:
     #   direction_front: 1.0
     #   direction_back: 1.0
 
-    # - name: left_claw_trans
-    #   type: SimpleTransmission
-    #   joint: left_claw_joint
-    #   actuator: left_claw_actuator
-    #   direction: 1.0
+    - name: left_claw_trans
+      type: SimpleTransmission
+      joint: left_claw_joint
+      actuator: left_claw_actuator
+      direction: 1.0
 
     - name: right_shoulder_pitch_trans
       type: SimpleTransmission
@@ -440,11 +440,11 @@ DcuDriverModule:
     #   direction_front: 1.0
     #   direction_back: 1.0
 
-    # - name: right_claw_trans
-    #   type: SimpleTransmission
-    #   joint: right_claw_joint
-    #   actuator: right_claw_actuator
-    #   direction: 1.0
+    - name: right_claw_trans
+      type: SimpleTransmission
+      joint: right_claw_joint
+      actuator: right_claw_actuator
+      direction: 1.0
 
     # - name: lumbar_parallel_trans
     #   type: LumbarParallelTransmission
