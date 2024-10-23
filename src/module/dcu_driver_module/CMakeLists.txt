@@ -36,13 +36,13 @@ target_include_directories(
 )
 
 # Set link libraries of target
-target_link_directories(${CUR_TARGET_NAME} PUBLIC xyber_controller/lib)
+target_link_directories(${CUR_TARGET_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/xyber_controller/lib)
 
 target_link_libraries(
   ${CUR_TARGET_NAME}
-  PRIVATE xyber_controller
-          yaml-cpp::yaml-cpp
-  PUBLIC aimrt::interface::aimrt_module_cpp_interface
+  PRIVATE yaml-cpp::yaml-cpp
+  PUBLIC xyber_controller
+         aimrt::interface::aimrt_module_cpp_interface
          aimrt::interface::aimrt_module_ros2_interface
          my_ros2_proto::my_ros2_proto__rosidl_generator_cpp
          my_ros2_proto::my_ros2_proto__rosidl_typesupport_cpp
@@ -70,3 +70,9 @@ target_link_libraries(
 if(XYBER_X1_INFER_BUILD_TESTS AND test_files)
   add_gtest_target(TEST_TARGET ${CUR_TARGET_NAME} TEST_SRC ${test_files})
 endif()
+
+# Install xyber_controller lib
+install(
+  DIRECTORY xyber_controller/lib/
+  DESTINATION lib
+)
