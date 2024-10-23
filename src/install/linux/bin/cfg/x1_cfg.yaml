@@ -189,18 +189,18 @@ DcuDriverModule:
     - left_shoulder_yaw_joint
     - left_elbow_pitch_joint
     - left_elbow_yaw_joint
-    # - left_wrist_pitch_joint
-    # - left_wrist_roll_joint
-    # - left_claw_joint
+    - left_wrist_pitch_joint
+    - left_wrist_roll_joint
+    - left_claw_joint
 
     - right_shoulder_pitch_joint
     - right_shoulder_roll_joint
     - right_shoulder_yaw_joint
     - right_elbow_pitch_joint
     - right_elbow_yaw_joint
-    # - right_wrist_pitch_joint
-    # - right_wrist_roll_joint
-    # - right_claw_joint      
+    - right_wrist_pitch_joint
+    - right_wrist_roll_joint
+    - right_claw_joint      
 
   actuator_list:  # 执行器列表
     - left_hip_pitch_actuator
@@ -226,18 +226,18 @@ DcuDriverModule:
     - left_shoulder_yaw_actuator
     - left_elbow_pitch_actuator
     - left_elbow_yaw_actuator
-    # - left_wrist_front_actuator
-    # - left_wrist_back_actuator
-    # - left_claw_actuator
+    - left_wrist_front_actuator
+    - left_wrist_back_actuator
+    - left_claw_actuator
 
     - right_shoulder_pitch_actuator
     - right_shoulder_roll_actuator
     - right_shoulder_yaw_actuator
     - right_elbow_pitch_actuator
     - right_elbow_yaw_actuator
-    # - right_wrist_back_actuator
-    # - right_wrist_front_actuator
-    # - right_claw_actuator
+    - right_wrist_back_actuator
+    - right_wrist_front_actuator
+    - right_claw_actuator
 
   ethercat:
     ifname: enp2s0          # 网卡名
@@ -267,15 +267,15 @@ DcuDriverModule:
         - name: left_elbow_yaw_actuator
           type: POWER_FLOW_R52
           can_id: 5
-        # - name: left_wrist_front_actuator
-        #   type: POWER_FLOW_L28
-        #   can_id: 6
-        # - name: left_wrist_back_actuator
-        #   type: POWER_FLOW_L28
-        #   can_id: 7
-        # - name: left_claw_actuator
-        #   type: OMNI_PICKER
-        #   can_id: 8
+        - name: left_wrist_front_actuator
+          type: POWER_FLOW_L28
+          can_id: 6
+        - name: left_wrist_back_actuator
+          type: POWER_FLOW_L28
+          can_id: 7
+        - name: left_claw_actuator
+          type: OMNI_PICKER
+          can_id: 8
       channel_2:
         - name: right_shoulder_pitch_actuator
           type: POWER_FLOW_R86
@@ -292,15 +292,15 @@ DcuDriverModule:
         - name: right_elbow_yaw_actuator
           type: POWER_FLOW_R52
           can_id: 5
-        # - name: right_wrist_back_actuator
-        #   type: POWER_FLOW_L28
-        #   can_id: 6
-        # - name: right_wrist_front_actuator
-        #   type: POWER_FLOW_L28
-        #   can_id: 7
-        # - name: right_claw_actuator
-        #   type: OMNI_PICKER
-        #   can_id: 8
+        - name: right_wrist_back_actuator
+          type: POWER_FLOW_L28
+          can_id: 6
+        - name: right_wrist_front_actuator
+          type: POWER_FLOW_L28
+          can_id: 7
+        - name: right_claw_actuator
+          type: OMNI_PICKER
+          can_id: 8
       channel_3:
         - name: lumbar_left_actuator
           type: POWER_FLOW_R86
