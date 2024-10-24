@@ -4,7 +4,7 @@
   <name>robot_description</name>
   <version>0.0.0</version>
   <description>X1</description>
-  <maintainer email="devil-kid@outlook.com"> </maintainer>
+  <maintainer email="developer@zhiyuan-robot.com"> </maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
