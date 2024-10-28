@@ -52,20 +52,28 @@ RLController::RLController(const ControlCfg& control_conf, bool use_sim_handles)
 }
 
 void RLController::SetMode(const ControlMode control_mode) {
-  control_mode_ = control_mode;
+  control_mode_.store(control_mode);
   trans_mode_percent_ = 0.0;
 
+  std::shared_lock<std::shared_mutex> lock(joint_state_mutex_);
   for (size_t j = 0; j < control_conf_.ordered_joint_name.size(); ++j) {
     current_joint_angles_(j) =
         joint_state_data_.position[joint_name_index_[control_conf_.ordered_joint_name[j]]];
   }
 }
 
-void RLController::SetCmdData(const geometry_msgs::msg::Twist joy_data) { joy_data_ = joy_data; }
+void RLController::SetCmdData(const geometry_msgs::msg::Twist joy_data) {
+  std::unique_lock<std::shared_mutex> lock(joy_mutex_);
+  joy_data_ = joy_data;
+}
 
-void RLController::SetImuData(const sensor_msgs::msg::Imu imu_data) { imu_data_ = imu_data; }
+void RLController::SetImuData(const sensor_msgs::msg::Imu imu_data) {
+  std::unique_lock<std::shared_mutex> lock(imu_mutex_);
+  imu_data_ = imu_data;
+}
 
 void RLController::SetJointStateData(const sensor_msgs::msg::JointState joint_state_data) {
+  std::unique_lock<std::shared_mutex> lock(joint_state_mutex_);
   joint_state_data_ = joint_state_data;
 
   if (joint_name_index_.empty()) {
@@ -75,9 +83,11 @@ void RLController::SetJointStateData(const sensor_msgs::msg::JointState joint_st
   }
 }
 
-ControlMode RLController::GetMode() { return control_mode_; }
+ControlMode RLController::GetMode() { return control_mode_.load(std::memory_order_acquire); }
 
 bool RLController::IsReady() {
+  std::shared_lock<std::shared_mutex> lock(joint_state_mutex_);
+
   if (joint_name_index_.empty()) {
     return false;
   }
@@ -131,7 +141,7 @@ void RLController::LoadModel() {
 void RLController::Update() {
   UpdateStateEstimation();
 
-  switch (control_mode_) {
+  switch (control_mode_.load()) {
     case ControlMode::IDLE:
       HandleIdleMode();
       break;
@@ -279,29 +289,35 @@ void RLController::HandleWalkMode() {
 }
 
 void RLController::UpdateStateEstimation() {
-  propri_.joint_pos.resize(control_conf_.onnx_conf.actions_size);
-  propri_.joint_vel.resize(control_conf_.onnx_conf.actions_size);
-  for (size_t i = 0; i < control_conf_.ordered_joint_name.size(); ++i) {
-    std::string joint_name = control_conf_.ordered_joint_name[i];
-    propri_.joint_pos(i) = joint_state_data_.position[joint_name_index_[joint_name]];
-    propri_.joint_vel(i) = joint_state_data_.velocity[joint_name_index_[joint_name]];
+  {
+    std::shared_lock<std::shared_mutex> lock(joint_state_mutex_);
+    propri_.joint_pos.resize(control_conf_.onnx_conf.actions_size);
+    propri_.joint_vel.resize(control_conf_.onnx_conf.actions_size);
+    for (size_t i = 0; i < control_conf_.ordered_joint_name.size(); ++i) {
+      std::string joint_name = control_conf_.ordered_joint_name[i];
+      propri_.joint_pos(i) = joint_state_data_.position[joint_name_index_[joint_name]];
+      propri_.joint_vel(i) = joint_state_data_.velocity[joint_name_index_[joint_name]];
+    }
   }
 
-  vector3_t angular_vel;
-  angular_vel(0) = imu_data_.angular_velocity.x;
-  angular_vel(1) = imu_data_.angular_velocity.y;
-  angular_vel(2) = imu_data_.angular_velocity.z;
-  propri_.base_ang_vel = angular_vel;
+  {
+    std::shared_lock<std::shared_mutex> lock(imu_mutex_);
+    vector3_t angular_vel;
+    angular_vel(0) = imu_data_.angular_velocity.x;
+    angular_vel(1) = imu_data_.angular_velocity.y;
+    angular_vel(2) = imu_data_.angular_velocity.z;
+    propri_.base_ang_vel = angular_vel;
 
-  vector3_t gravity_vector(0, 0, -1);
-  quaternion_t quat;
-  quat.x() = imu_data_.orientation.x;
-  quat.y() = imu_data_.orientation.y;
-  quat.z() = imu_data_.orientation.z;
-  quat.w() = imu_data_.orientation.w;
-  matrix_t inverse_rot = GetRotationMatrixFromZyxEulerAngles(QuatToZyx(quat)).inverse();
-  propri_.projected_gravity = inverse_rot * gravity_vector;
-  propri_.base_euler_xyz = QuatToXyz(quat);
+    vector3_t gravity_vector(0, 0, -1);
+    quaternion_t quat;
+    quat.x() = imu_data_.orientation.x;
+    quat.y() = imu_data_.orientation.y;
+    quat.z() = imu_data_.orientation.z;
+    quat.w() = imu_data_.orientation.w;
+    matrix_t inverse_rot = GetRotationMatrixFromZyxEulerAngles(QuatToZyx(quat)).inverse();
+    propri_.projected_gravity = inverse_rot * gravity_vector;
+    propri_.base_euler_xyz = QuatToXyz(quat);
+  }
 }
 
 void RLController::ComputeObservation() {

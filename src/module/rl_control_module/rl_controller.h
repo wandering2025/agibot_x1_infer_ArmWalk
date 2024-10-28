@@ -2,8 +2,11 @@
 // All rights reserved.
 #pragma once
 #include <onnxruntime/onnxruntime_cxx_api.h>
+#include <atomic>
 #include <map>
 #include <memory>
+#include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -109,9 +112,15 @@ class RLController {
   std::vector<std::vector<int64_t>> output_shapes_;
 
   // from ros2 topic
-  ControlMode control_mode_;
+  std::atomic<ControlMode> control_mode_;
+
+  mutable std::shared_mutex joy_mutex_;
   geometry_msgs::msg::Twist joy_data_;
+
+  mutable std::shared_mutex imu_mutex_;
   sensor_msgs::msg::Imu imu_data_;
+
+  mutable std::shared_mutex joint_state_mutex_;
   sensor_msgs::msg::JointState joint_state_data_;
   std::unordered_map<std::string, int32_t> joint_name_index_;
 
