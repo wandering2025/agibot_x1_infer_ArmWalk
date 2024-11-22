@@ -27,7 +27,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "joy.h"
+#include "joy_stick_module/joy.h"
+
 #include <SDL2/SDL.h>
 #include <unistd.h>
 #include <algorithm>

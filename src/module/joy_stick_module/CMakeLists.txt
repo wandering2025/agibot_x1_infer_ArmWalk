@@ -25,7 +25,9 @@ target_sources(${CUR_TARGET_NAME} PRIVATE ${src})
 # Set include path of target
 target_include_directories(
   ${CUR_TARGET_NAME}
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>)
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
 
 # Set link libraries of target
 find_package(std_msgs)
@@ -80,3 +82,15 @@ target_link_libraries(
 if(XYBER_X1_INFER_BUILD_TESTS AND test_files)
   add_gtest_target(TEST_TARGET ${CUR_TARGET_NAME} TEST_SRC ${test_files})
 endif()
+
+# Install config files
+install(
+  DIRECTORY cfg/
+  DESTINATION bin/cfg/${CUR_DIR}
+)
+
+# install config files to build dir
+file(
+  COPY cfg/
+  DESTINATION ${CMAKE_BINARY_DIR}/cfg/${CUR_DIR}
+)

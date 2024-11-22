@@ -10,9 +10,9 @@ set(CUR_TARGET_NAME ${CUR_SUPERIOR_NAMESPACE_UNDERLINE}_${CUR_DIR})
 set(CUR_TARGET_ALIAS_NAME ${CUR_SUPERIOR_NAMESPACE}::${CUR_DIR})
 
 # Set file collection
-file(GLOB_RECURSE head_files ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB_RECURSE src ${CMAKE_CURRENT_SOURCE_DIR}/*.cc)
-file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/*_test.cc)
+file(GLOB_RECURSE head_files ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
+file(GLOB_RECURSE src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc)
+file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/*_test.cc)
 list(REMOVE_ITEM src ${test_files})
 
 # Add target
@@ -30,6 +30,7 @@ find_package(onnxruntime REQUIRED)
 target_include_directories(
   ${CUR_TARGET_NAME}
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
 # Set link libraries of target
@@ -64,3 +65,15 @@ target_link_libraries(
 if(XYBER_X1_INFER_BUILD_TESTS AND test_files)
   add_gtest_target(TEST_TARGET ${CUR_TARGET_NAME} TEST_SRC ${test_files})
 endif()
+
+# Install config files
+install(
+  DIRECTORY cfg/
+  DESTINATION bin/cfg/${CUR_DIR}
+)
+
+# install config files to build dir
+file(
+  COPY cfg/
+  DESTINATION ${CMAKE_BINARY_DIR}/cfg/${CUR_DIR}
+)

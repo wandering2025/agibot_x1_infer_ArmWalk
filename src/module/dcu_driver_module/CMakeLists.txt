@@ -16,9 +16,9 @@ set(CUR_TARGET_NAME ${CUR_SUPERIOR_NAMESPACE_UNDERLINE}_${CUR_DIR})
 set(CUR_TARGET_ALIAS_NAME ${CUR_SUPERIOR_NAMESPACE}::${CUR_DIR})
 
 # Set file collection
-file(GLOB_RECURSE head_files ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB_RECURSE src ${CMAKE_CURRENT_SOURCE_DIR}/*.cc)
-file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/*_test.cc)
+file(GLOB_RECURSE head_files ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
+file(GLOB_RECURSE src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc)
+file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/*_test.cc)
 list(REMOVE_ITEM src ${test_files})
 
 # Add target
@@ -32,6 +32,7 @@ target_sources(${CUR_TARGET_NAME} PRIVATE ${src})
 target_include_directories(
   ${CUR_TARGET_NAME}
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/xyber_controller/include>
 )
 
@@ -75,4 +76,16 @@ endif()
 install(
   DIRECTORY xyber_controller/lib/
   DESTINATION lib
+)
+
+# Install config files
+install(
+  DIRECTORY cfg/
+  DESTINATION bin/cfg/${CUR_DIR}
+)
+
+# install config files to build dir
+file(
+  COPY cfg/
+  DESTINATION ${CMAKE_BINARY_DIR}/cfg/${CUR_DIR}
 )

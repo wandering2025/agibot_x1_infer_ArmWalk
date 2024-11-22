@@ -1,0 +1,21 @@
+freq: 20 # 数据发布频率，单位：Hz
+float_pubs:
+  - topic_name: start_control
+    buttons: [7]
+  - topic_name: zero_mode
+    buttons: [1]
+  - topic_name: stand_mode
+    buttons: [0]
+  - topic_name: walk_mode
+    buttons: [2]
+twist_pubs:
+  - topic_name: cmd_vel
+    buttons: [4]
+    axis:
+      linear-x: 1
+      linear-y: 0
+      angular-z: 3
+rpc_clients:
+  - interface_type: std_srvs/srv/Empty
+    service_name: reset_world
+    buttons: [3]

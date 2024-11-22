@@ -127,28 +127,12 @@ class XyberController {
   bool DisableActuator(const std::string& name);
 
   /**
-   * @brief get tempure
-   *
-   * @param name
-   * @return float unite Volt
-   */
-  float GetTempure(const std::string& name);
-
-  /**
    * @brief Get the Power State
    *
    * @param name
    * @return ActautorState
    */
   ActautorState GetPowerState(const std::string& name);
-
-  /**
-   * @brief Get the Mode
-   *
-   * @param name
-   * @return ActautorMode
-   */
-  ActautorMode GetMode(const std::string& name);
 
   /**
    * @brief Get the Torque

@@ -10,8 +10,8 @@
 
 // projects
 #include "aimrt_module_cpp_interface/module_base.h"
-#include "dcu_driver_module/ankle_transmission.h"
 #include "dcu_driver_module/config_parse.h"
+#include "dcu_driver_module/transmission.h"
 #include "my_ros2_proto/msg/joint_command.hpp"
 #include "xyber_controller/xyber_controller.h"
 
