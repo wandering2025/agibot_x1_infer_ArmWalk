@@ -118,11 +118,13 @@ bool DcuDriverModule::InitDcu(YAML::Node& cfg_node) {
   // enable actuator and imu
   if (enable_actuator_) {
     for (const auto name : actuator_name_list_) {
-      ret = xyber_ctrl_->EnableActuator(name);
-      if (!ret) {
-        AIMRT_ERROR_THROW("EnableActuator {} failed.", name);
-        return false;
+      if (!xyber_ctrl_->EnableActuator(name)) {
+        ret = false;
       }
+    }
+    if (!ret) {
+      AIMRT_ERROR_THROW("EnableActuator failed.");
+      return false;
     }
 
     // update actuator cmd cache

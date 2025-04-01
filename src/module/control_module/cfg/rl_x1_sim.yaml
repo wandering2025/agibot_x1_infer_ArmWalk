@@ -283,7 +283,7 @@ controllers:
     walk_step_conf:
       action_scale: 0.5    # 推理的增量结果，缩放系数
       decimation: 10       # 采样间隔
-      cycle_time: 0.7      # 步态周期
+      cycle_time: 1      # 步态周期
       sw_mode: True        # 原地步态是否接受周期波函数
       cmd_threshold: 0.05 
     obs_scales:
