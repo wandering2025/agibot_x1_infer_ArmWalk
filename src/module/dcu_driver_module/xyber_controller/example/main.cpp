@@ -1,11 +1,15 @@
-// Copyright (c) 2023, AgiBot Inc.
-// All rights reserved.
+/*
+ * @Author: richie.li
+ * @Date: 2024-10-21 14:10:06
+ * @LastEditors: richie.li
+ * @LastEditTime: 2024-10-21 20:16:21
+ */
 
 #include <cstdint>
 #include <iostream>
 #include <thread>
 
-#include "xyber_controller/xyber_controller.h"
+#include "xyber_controller.h"
 
 using namespace xyber;
 using namespace std::chrono_literals;

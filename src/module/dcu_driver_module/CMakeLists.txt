@@ -21,6 +21,9 @@ file(GLOB_RECURSE src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc)
 file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/*_test.cc)
 list(REMOVE_ITEM src ${test_files})
 
+# Add SDK
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/xyber_controller)
+
 # Add target
 add_library(${CUR_TARGET_NAME} STATIC)
 add_library(${CUR_TARGET_ALIAS_NAME} ALIAS ${CUR_TARGET_NAME})
@@ -33,12 +36,9 @@ target_include_directories(
   ${CUR_TARGET_NAME}
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/xyber_controller/include>
 )
 
 # Set link libraries of target
-target_link_directories(${CUR_TARGET_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/xyber_controller/lib)
-
 target_link_libraries(
   ${CUR_TARGET_NAME}
   PRIVATE yaml-cpp::yaml-cpp
@@ -72,20 +72,16 @@ if(XYBER_X1_INFER_BUILD_TESTS AND test_files)
   add_gtest_target(TEST_TARGET ${CUR_TARGET_NAME} TEST_SRC ${test_files})
 endif()
 
-# Install xyber_controller lib
-install(
-  DIRECTORY xyber_controller/lib/
-  DESTINATION lib
-)
-
 # Install config files
 install(
   DIRECTORY cfg/
   DESTINATION bin/cfg/${CUR_DIR}
+  USE_SOURCE_PERMISSIONS
 )
 
 # install config files to build dir
-file(
-  COPY cfg/
+install(
+  DIRECTORY cfg/
   DESTINATION ${CMAKE_BINARY_DIR}/cfg/${CUR_DIR}
+  USE_SOURCE_PERMISSIONS
 )

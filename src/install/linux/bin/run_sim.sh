@@ -7,3 +7,4 @@ elif [ -f ../share/ros2_plugin_proto/local_setup.bash ]; then
 fi
 
 ./aimrt_main --cfg_file_path=./cfg/x1_cfg_sim.yaml
+# gdb --args ./aimrt_main --cfg_file_path=./cfg/x1_cfg_sim.yaml

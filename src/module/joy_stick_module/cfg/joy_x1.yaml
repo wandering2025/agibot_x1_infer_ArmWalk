@@ -1,21 +1,37 @@
-freq: 20 # 数据发布频率，单位：Hz
+freq: 20   # 数据发布频率，单位：Hz
+
 float_pubs:
-  - topic_name: start_control
+  - topic_name: /idle_mode
     buttons: [7]
-  - topic_name: zero_mode
+  - topic_name: /zero_mode
     buttons: [1]
-  - topic_name: stand_mode
+  - topic_name: /stand_mode
     buttons: [0]
-  - topic_name: walk_mode
+  - topic_name: /walk_mode
     buttons: [2]
+  - topic_name: /walk_mode2
+    buttons: [3]
+  - topic_name: /keep_mode
+    buttons: [6]
+  - topic_name: /plan_mode
+    buttons: [5]
+
+# Twist twist
+#         Vector3  linear
+#                 float64 x
+#                 float64 y
+#                 float64 z
+#         Vector3  angular
+#                 float64 x
+#                 float64 y
+#                 float64 z
 twist_pubs:
-  - topic_name: cmd_vel
+  - topic_name: /cmd_vel
     buttons: [4]
     axis:
       linear-x: 1
       linear-y: 0
       angular-z: 3
-rpc_clients:
-  - interface_type: std_srvs/srv/Empty
-    service_name: reset_world
-    buttons: [3]
+    # twist的线速度和角速度限制
+    velocity_limit_lb: [-0.5, -0.3, -0.5]
+    velocity_limit_ub: [0.5, 0.3, 0.5]

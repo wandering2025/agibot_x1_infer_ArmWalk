@@ -10,10 +10,12 @@
 
 // projects
 #include "aimrt_module_cpp_interface/module_base.h"
+#include "dcu_driver_module/ankle_transmission.h"
+#include "dcu_driver_module/wrist_transmission.h"
+#include "dcu_driver_module/lumbar_transmission.h"
 #include "dcu_driver_module/config_parse.h"
-#include "dcu_driver_module/transmission.h"
+#include "dcu_driver_module/xyber_controller/xyber_api/include/xyber_controller.h"
 #include "my_ros2_proto/msg/joint_command.hpp"
-#include "xyber_controller/xyber_controller.h"
 
 namespace xyber_x1_infer::dcu_driver_module {
 
@@ -41,6 +43,7 @@ class DcuDriverModule : public aimrt::ModuleBase {
   void JointCmdCallback(const std::shared_ptr<const my_ros2_proto::msg::JointCommand>& msg);
 
  private:
+  bool actuator_debug_ = false;
   bool enable_actuator_ = false;
   double publish_frequecy_ = 100.0f;
   std::atomic_bool is_running_ = false;
@@ -55,6 +58,8 @@ class DcuDriverModule : public aimrt::ModuleBase {
   aimrt::CoreRef core_;
   aimrt::channel::PublisherRef pub_imu_;
   aimrt::channel::PublisherRef pub_joint_state_;
+  aimrt::channel::PublisherRef pub_actuator_cmd_;
+  aimrt::channel::PublisherRef pub_actuator_state_;
   aimrt::channel::SubscriberRef sub_joint_cmd_;
 
   YAML::EthercatConfig ecat_cfg_;

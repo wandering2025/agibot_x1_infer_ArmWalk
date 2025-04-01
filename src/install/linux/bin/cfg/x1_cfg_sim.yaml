@@ -23,6 +23,8 @@ aimrt:
         type: simple_thread
       - name: joy_stick_pub_thread
         type: simple_thread
+      - name: sim_render_thread
+        type: simple_thread
   channel: # 消息队列相关配置
     backends: # 消息队列后端配置
       - type: local
@@ -32,27 +34,31 @@ aimrt:
         enable_backends: [local, ros2]
     sub_topics_options: # 为 subscribe topic 选择后端
       - topic_name: "(.*)"
-        enable_backends: [local, ros2]
+        enable_backends: [local]
   rpc: # rpc相关配置
     backends: # rpc后端配置
-      # - type: local
+      - type: local
       - type: ros2
     clients_options: # 为 client 选择后端
       - func_name: "(.*)"
-        enable_backends: [ros2]
+        enable_backends: [local]
     servers_options: # 为 server 选择后端
       - func_name: "(.*)"
-        enable_backends: [ros2]
+        enable_backends: [local, ros2]
   module: # 模块配置
     pkgs: # 要加载的动态库配置
       - path: ./libpkg1.so
         enable_modules:
           - JoyStickModule
-          - RlControlModule
+          - ControlModule
+          - SimModule
     modules: # 模块
       - name: JoyStickModule
         log_lvl: INFO
         cfg_file_path: ./cfg/joy_stick_module/joy_x1.yaml
-      - name: RlControlModule
+      - name: ControlModule
         log_lvl: INFO
-        cfg_file_path: ./cfg/rl_control_module/rl_x1_sim.yaml
+        cfg_file_path: ./cfg/control_module/rl_x1_sim.yaml
+      - name: SimModule
+        log_lvl: INFO
+        cfg_file_path: ./cfg/sim_module/sim_x1.yaml

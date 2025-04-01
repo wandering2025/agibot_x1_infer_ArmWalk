@@ -3,6 +3,9 @@ message("Configuring Xyber Controller project")
 
 project(xyber_controller LANGUAGES CXX C)
 
+# Set cmake path
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 set(CMAKE_INSTALL_RPATH "$ORIGIN;$ORIGIN/../lib;")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
@@ -14,37 +17,21 @@ find_package(Threads REQUIRED)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -Wl,--disable-new-dtags")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wl,--disable-new-dtags")
 
-# Set target name
-set(CUR_TARGET_NAME "example")
+add_subdirectory(third_party/soem)
+add_subdirectory(xyber_api)
+# add_subdirectory(example)
 
-# Set file collection
-file(GLOB_RECURSE src example/*.cpp)
+install(SCRIPT "cmake/post_install_script.cmake")
 
-# Add target
-add_executable(${CUR_TARGET_NAME})
+# CPack
+set(CPACK_PACKAGE_VERSION_MAJOR 0)
+set(CPACK_PACKAGE_VERSION_MINOR 5)
+set(CPACK_PACKAGE_VERSION_PATCH 0)
+set(CPACK_GENERATOR "ZIP")
+set(CPACK_PACKAGE_NAME "XyberController")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A brief description of XyberController: version: v0.5.x")
+set(CPACK_PACKAGE_VENDOR "AgibotTech")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Richie.Li")
 
-# Set source file of target
-target_sources(${CUR_TARGET_NAME} PRIVATE ${src})
-
-# Set include path of target
-target_include_directories(
-  ${CUR_TARGET_NAME}
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
-
-# Set link libraries of target
-target_link_directories(${CUR_TARGET_NAME} PUBLIC lib)
-
-target_link_libraries(${CUR_TARGET_NAME} PUBLIC xyber_controller)
-
-install(
-  TARGETS ${CUR_TARGET_NAME}
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin COMPONENT ${CUR_TARGET_NAME}
-)
-
-install(
-  DIRECTORY lib/
-  DESTINATION bin
-)
+include(CPack)

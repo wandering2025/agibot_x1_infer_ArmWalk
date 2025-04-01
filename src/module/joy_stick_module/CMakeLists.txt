@@ -10,9 +10,9 @@ set(CUR_TARGET_NAME ${CUR_SUPERIOR_NAMESPACE_UNDERLINE}_${CUR_DIR})
 set(CUR_TARGET_ALIAS_NAME ${CUR_SUPERIOR_NAMESPACE}::${CUR_DIR})
 
 # Set file collection
-file(GLOB_RECURSE head_files ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB_RECURSE src ${CMAKE_CURRENT_SOURCE_DIR}/*.cc)
-file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/*_test.cc)
+file(GLOB_RECURSE head_files ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
+file(GLOB_RECURSE src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc)
+file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/*_test.cc)
 list(REMOVE_ITEM src ${test_files})
 
 # Add target
@@ -27,6 +27,12 @@ target_include_directories(
   ${CUR_TARGET_NAME}
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/third_party/include>
+)
+
+target_link_directories(
+  ${CUR_TARGET_NAME}
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/third_party/lib>
 )
 
 # Set link libraries of target
@@ -76,7 +82,8 @@ target_link_libraries(
          std_srvs::std_srvs__rosidl_typesupport_fastrtps_cpp
          std_srvs::std_srvs__rosidl_typesupport_introspection_cpp
          std_srvs::std_srvs_aimrt_rpc_gencode
-         SDL2)
+         SDL2
+         qpOASES)
 
 # Set test of target
 if(XYBER_X1_INFER_BUILD_TESTS AND test_files)
@@ -87,10 +94,17 @@ endif()
 install(
   DIRECTORY cfg/
   DESTINATION bin/cfg/${CUR_DIR}
+  USE_SOURCE_PERMISSIONS
 )
 
 # install config files to build dir
-file(
-  COPY cfg/
+install(
+  DIRECTORY cfg/
   DESTINATION ${CMAKE_BINARY_DIR}/cfg/${CUR_DIR}
+  USE_SOURCE_PERMISSIONS
+)
+
+install(
+  DIRECTORY third_party/lib/
+  DESTINATION lib
 )

@@ -1,6 +1,7 @@
 publish_frequecy: 1000.0      # 数据发布频率
 imu_dcu_name: hip             # IMU数据来源，下肢DCU
 enable_actuator: true         # 使能所有执行器
+actuator_debug: true         # 发布所有执行器的调试数据
 
 joint_list:                   # 关节列表
   - left_hip_pitch_joint
@@ -203,7 +204,7 @@ transmission:                               # 传动层配置
     type: SimpleTransmission              
     joint: left_shoulder_roll_joint        
     actuator: left_shoulder_roll_actuator  
-    direction: 1.0                         
+    direction: -1.0                         
 
   - name: left_shoulder_yaw_trans
     type: SimpleTransmission
@@ -223,14 +224,15 @@ transmission:                               # 传动层配置
     actuator: left_elbow_yaw_actuator
     direction: 1.0
 
-  # - name: left_wrist_parallel_trans
-  #   type: LeftWristParallelTransmission
-  #   joint_pitch: left_wrist_pitch_joint
-  #   joint_roll: left_wrist_roll_joint
-  #   actuator_front: left_wrist_front_actuator
-  #   actuator_back: left_wrist_back_actuator
-  #   direction_front: 1.0
-  #   direction_back: 1.0
+  - name: left_wrist_parallel_trans
+    type: LeftWristParallelTransmission
+    joint_pitch: left_wrist_pitch_joint
+    joint_roll: left_wrist_roll_joint
+    actuator_left: left_wrist_front_actuator
+    actuator_right: left_wrist_back_actuator
+    direction_left: 1.0
+    direction_right: 1.0
+    param_path: null
 
   - name: left_claw_trans
     type: SimpleTransmission
@@ -242,7 +244,7 @@ transmission:                               # 传动层配置
     type: SimpleTransmission
     joint: right_shoulder_pitch_joint
     actuator: right_shoulder_pitch_actuator
-    direction: 1.0
+    direction: -1.0
 
   - name: right_shoulder_roll_trans
     type: SimpleTransmission
@@ -260,7 +262,7 @@ transmission:                               # 传动层配置
     type: SimpleTransmission
     joint: right_elbow_pitch_joint
     actuator: right_elbow_pitch_actuator
-    direction: 1.0
+    direction: -1.0
 
   - name: right_elbow_yaw_trans
     type: SimpleTransmission
@@ -268,14 +270,15 @@ transmission:                               # 传动层配置
     actuator: right_elbow_yaw_actuator
     direction: 1.0
 
-  # - name: right_wrist_parallel_trans
-  #   type: RightWristParallelTransmission
-  #   joint_pitch: right_wrist_pitch_joint
-  #   joint_roll: right_wrist_roll_joint
-  #   actuator_front: right_wrist_front_actuator
-  #   actuator_back: right_wrist_back_actuator
-  #   direction_front: 1.0
-  #   direction_back: 1.0
+  - name: right_wrist_parallel_trans
+    type: RightWristParallelTransmission
+    joint_pitch: right_wrist_pitch_joint
+    joint_roll: right_wrist_roll_joint
+    actuator_left: right_wrist_front_actuator
+    actuator_right: right_wrist_back_actuator
+    direction_left: 1.0
+    direction_right: 1.0
+    param_path: null
 
   - name: right_claw_trans
     type: SimpleTransmission
@@ -283,14 +286,15 @@ transmission:                               # 传动层配置
     actuator: right_claw_actuator
     direction: 1.0
 
-  # - name: lumbar_parallel_trans
-  #   type: LumbarParallelTransmission
-  #   joint_pitch: lumbar_pitch_joint
-  #   joint_roll: lumbar_roll_joint
-  #   actuator_left: lumbar_left_actuator
-  #   actuator_right: lumbar_right_actuator
-  #   direction_left: 1.0
-  #   direction_right: 1.0
+  - name: lumbar_parallel_trans
+    type: LumbarParallelTransmission
+    joint_pitch: lumbar_pitch_joint
+    joint_roll: lumbar_roll_joint
+    actuator_left: lumbar_left_actuator
+    actuator_right: lumbar_right_actuator
+    direction_left: 1.0
+    direction_right: 1.0
+    param_path: null
 
   - name: lumbar_yaw_trans
     type: SimpleTransmission
@@ -329,8 +333,8 @@ transmission:                               # 传动层配置
     actuator_left: left_ankle_left_actuator
     actuator_right: left_ankle_right_actuator
     direction_left: 1.0
-    direction_right: -1.0
-    param_path: null
+    direction_right: 1.0
+    param_path: cfg/dcu_driver_module/ankle_trans_x1.yaml
 
   - name: right_hip_pitch_trans
     type: SimpleTransmission
@@ -363,5 +367,5 @@ transmission:                               # 传动层配置
     actuator_left: right_ankle_left_actuator      # 绑定的 左侧连杆执行器
     actuator_right: right_ankle_right_actuator    # 绑定的 右侧连杆执行器
     direction_left: 1.0                           # 左侧连杆执行器的方向
-    direction_right: -1.0                         # 右侧连杆执行器的方向
-    param_path: null                              # 其他配置参数
+    direction_right: 1.0                          # 右侧连杆执行器的方向
+    param_path: cfg/dcu_driver_module/ankle_trans_x1.yaml  # 其他配置参数

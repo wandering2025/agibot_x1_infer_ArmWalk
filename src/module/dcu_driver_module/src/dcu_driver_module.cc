@@ -23,6 +23,7 @@ bool DcuDriverModule::Initialize(aimrt::CoreRef core) {
     auto file_path = core_.GetConfigurator().GetConfigFilePath();
     YAML::Node cfg_node = YAML::LoadFile(file_path.data());
     imu_dcu_name_ = cfg_node["imu_dcu_name"].as<std::string>();
+    actuator_debug_ = cfg_node["actuator_debug"].as<bool>();
     enable_actuator_ = cfg_node["enable_actuator"].as<bool>();
     publish_frequecy_ = cfg_node["publish_frequecy"].as<double>();
     joint_name_list_ = cfg_node["joint_list"].as<std::vector<std::string>>();
@@ -40,6 +41,12 @@ bool DcuDriverModule::Initialize(aimrt::CoreRef core) {
 
     pub_joint_state_ = core_.GetChannelHandle().GetPublisher("/joint_states");
     aimrt::channel::RegisterPublishType<sensor_msgs::msg::JointState>(pub_joint_state_);
+
+    pub_actuator_cmd_ = core_.GetChannelHandle().GetPublisher("/actuator_cmd");
+    aimrt::channel::RegisterPublishType<my_ros2_proto::msg::JointCommand>(pub_actuator_cmd_);
+
+    pub_actuator_state_ = core_.GetChannelHandle().GetPublisher("/actuator_states");
+    aimrt::channel::RegisterPublishType<sensor_msgs::msg::JointState>(pub_actuator_state_);
 
     // Initialize subscriber
     sub_joint_cmd_ = core_.GetChannelHandle().GetSubscriber("/joint_cmd");
@@ -233,6 +240,107 @@ bool DcuDriverModule::InitTransmission(YAML::Node& cfg_node) {
       //     "Add Transmission {}, type {}, bind actr left {}, actr right {}, joint pitch {},
       //     joint roll {} .", name, type, actuator_left, actuator_right, joint_pitch,
       //     joint_roll);
+    } else if (type == "LeftWristParallelTransmission" ||
+               type == "RightWristParallelTransmission") {
+      double direction_left = node["direction_left"].as<double>();
+      double direction_right = node["direction_right"].as<double>();
+      std::string param_path = node["param_path"].as<std::string>();
+      std::string joint_pitch = node["joint_pitch"].as<std::string>();
+      std::string joint_roll = node["joint_roll"].as<std::string>();
+      std::string actuator_left = node["actuator_left"].as<std::string>();
+      std::string actuator_right = node["actuator_right"].as<std::string>();
+
+      const auto& joint_pitch_it = joint_data_space_.find(joint_pitch);
+      if (joint_pitch_it == joint_data_space_.end()) {
+        AIMRT_WARN("Transmission {} can`t find joint {}, ignored.", name, joint_pitch);
+        continue;
+      }
+      const auto& joint_roll_it = joint_data_space_.find(joint_roll);
+      if (joint_roll_it == joint_data_space_.end()) {
+        AIMRT_WARN("Transmission {} can`t find joint {}, ignored.", name, joint_roll);
+        continue;
+      }
+      const auto& actuator_left_it = actuator_data_space_.find(actuator_left);
+      if (actuator_left_it == actuator_data_space_.end()) {
+        AIMRT_WARN("Transmission {} can`t find actuator {}, ignored.", name, actuator_left);
+        continue;
+      }
+      const auto& actuator_right_it = actuator_data_space_.find(actuator_right);
+      if (actuator_right_it == actuator_data_space_.end()) {
+        AIMRT_WARN("Transmission {} can`t find actuator {}, ignored.", name, actuator_right);
+        continue;
+      }
+
+      JointHandle joint_pitch_data;
+      joint_pitch_data.handle = &joint_pitch_it->second;
+
+      JointHandle joint_roll_data;
+      joint_roll_data.handle = &joint_roll_it->second;
+
+      ActuatorHandle actr_left_data;
+      actr_left_data.direction = direction_left;
+      actr_left_data.handle = &actuator_left_it->second;
+
+      ActuatorHandle actr_right_data;
+      actr_right_data.direction = direction_right;
+      actr_right_data.handle = &actuator_right_it->second;
+
+      if (type == "LeftWristParallelTransmission") {
+        auto trans = new LeftWristParallelTransmission(
+            name, param_path, actr_left_data, actr_right_data, joint_pitch_data, joint_roll_data);
+        transmission_.RegisterTransmission(trans);
+      } else {
+        auto trans = new RightWristParallelTransmission(
+            name, param_path, actr_left_data, actr_right_data, joint_pitch_data, joint_roll_data);
+        transmission_.RegisterTransmission(trans);
+      }
+    } else if (type == "LumbarParallelTransmission") {
+      double direction_left = node["direction_left"].as<double>();
+      double direction_right = node["direction_right"].as<double>();
+      std::string param_path = node["param_path"].as<std::string>();
+      std::string joint_pitch = node["joint_pitch"].as<std::string>();
+      std::string joint_roll = node["joint_roll"].as<std::string>();
+      std::string actuator_left = node["actuator_left"].as<std::string>();
+      std::string actuator_right = node["actuator_right"].as<std::string>();
+
+      const auto& joint_pitch_it = joint_data_space_.find(joint_pitch);
+      if (joint_pitch_it == joint_data_space_.end()) {
+        AIMRT_WARN("Transmission {} can`t find joint {}, ignored.", name, joint_pitch);
+        continue;
+      }
+      const auto& joint_roll_it = joint_data_space_.find(joint_roll);
+      if (joint_roll_it == joint_data_space_.end()) {
+        AIMRT_WARN("Transmission {} can`t find joint {}, ignored.", name, joint_roll);
+        continue;
+      }
+      const auto& actuator_left_it = actuator_data_space_.find(actuator_left);
+      if (actuator_left_it == actuator_data_space_.end()) {
+        AIMRT_WARN("Transmission {} can`t find actuator {}, ignored.", name, actuator_left);
+        continue;
+      }
+      const auto& actuator_right_it = actuator_data_space_.find(actuator_right);
+      if (actuator_right_it == actuator_data_space_.end()) {
+        AIMRT_WARN("Transmission {} can`t find actuator {}, ignored.", name, actuator_right);
+        continue;
+      }
+
+      JointHandle joint_pitch_data;
+      joint_pitch_data.handle = &joint_pitch_it->second;
+
+      JointHandle joint_roll_data;
+      joint_roll_data.handle = &joint_roll_it->second;
+
+      ActuatorHandle actr_left_data;
+      actr_left_data.direction = direction_left;
+      actr_left_data.handle = &actuator_left_it->second;
+
+      ActuatorHandle actr_right_data;
+      actr_right_data.direction = direction_right;
+      actr_right_data.handle = &actuator_right_it->second;
+
+      auto trans = new LumbarParallelTransmission(name, param_path, actr_left_data, actr_right_data,
+                                                  joint_pitch_data, joint_roll_data);
+      transmission_.RegisterTransmission(trans);
     } else {
       AIMRT_ERROR_THROW("Transmission {} type {} not support.", name, type);
       return false;
@@ -246,6 +354,10 @@ void DcuDriverModule::PublishLoop() {
   // create publish proxy
   aimrt::channel::PublisherProxy<sensor_msgs::msg::Imu> pub_imu(pub_imu_);
   aimrt::channel::PublisherProxy<sensor_msgs::msg::JointState> pub_joint_state(pub_joint_state_);
+  aimrt::channel::PublisherProxy<sensor_msgs::msg::JointState> pub_actuator_state(
+      pub_actuator_state_);
+  aimrt::channel::PublisherProxy<my_ros2_proto::msg::JointCommand> pub_actuator_cmd(
+      pub_actuator_cmd_);
 
   sensor_msgs::msg::Imu imu_msg;
   sensor_msgs::msg::JointState js_msg;
@@ -256,6 +368,20 @@ void DcuDriverModule::PublishLoop() {
   js_msg.effort.resize(js_msg.name.size());
   js_msg.velocity.resize(js_msg.name.size());
   js_msg.position.resize(js_msg.name.size());
+
+  sensor_msgs::msg::JointState actr_state;
+  actr_state.name = actuator_name_list_;
+  actr_state.effort.resize(actr_state.name.size());
+  actr_state.velocity.resize(actr_state.name.size());
+  actr_state.position.resize(actr_state.name.size());
+
+  my_ros2_proto::msg::JointCommand actr_cmd;
+  actr_cmd.name = actuator_name_list_;
+  actr_cmd.effort.resize(actr_cmd.name.size());
+  actr_cmd.velocity.resize(actr_cmd.name.size());
+  actr_cmd.position.resize(actr_cmd.name.size());
+  actr_cmd.stiffness.resize(actr_cmd.name.size());
+  actr_cmd.damping.resize(actr_cmd.name.size());
 
   auto period = std::chrono::nanoseconds((uint64_t)(1 / publish_frequecy_ * 1000000000));
   auto next_loop_time = std::chrono::steady_clock::now();
@@ -296,6 +422,25 @@ void DcuDriverModule::PublishLoop() {
     js_msg.header.stamp = stamp;
     pub_joint_state.Publish(js_msg);
 
+    // pub actuator data for debug
+    if (actuator_debug_) {
+      for (size_t i = 0; i < actuator_name_list_.size(); i++) {
+        auto it = actuator_data_space_.find(actuator_name_list_[i]);
+
+        actr_state.effort[i] = it->second.state.effort;
+        actr_state.velocity[i] = it->second.state.velocity;
+        actr_state.position[i] = it->second.state.position;
+
+        actr_cmd.effort[i] = it->second.cmd.effort;
+        actr_cmd.velocity[i] = it->second.cmd.velocity;
+        actr_cmd.position[i] = it->second.cmd.position;
+        actr_cmd.stiffness[i] = it->second.cmd.kp;
+        actr_cmd.damping[i] = it->second.cmd.kd;
+      }
+      pub_actuator_cmd.Publish(actr_cmd);
+      pub_actuator_state.Publish(actr_state);
+    }
+
     // publish imu
     DcuImu imu = xyber_ctrl_->GetDcuImuData(imu_dcu_name_);
     imu_msg.angular_velocity.x = imu.gyro[0] / 180 * M_PI;
@@ -326,6 +471,8 @@ void DcuDriverModule::JointCmdCallback(
     auto it = joint_data_space_.find(msg->name[i]);
     if (it == joint_data_space_.end()) {
       AIMRT_WARN("JointCmdCallback joint {} not found.", msg->name[i]);
+      AIMRT_WARN("num {}", i);
+
       continue;
     }
     it->second.cmd.effort = msg->effort[i];

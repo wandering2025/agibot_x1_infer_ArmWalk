@@ -1,9 +1,11 @@
 // Copyright (c) 2023, AgiBot Inc.
-// All rights reserved.#pragma once
+// All rights reserved.
+#pragma once
 #include <future>
 
 #include "aimrt_module_cpp_interface/module_base.h"
 #include "joy_stick_module/joy.h"
+#include "joy_stick_module/joy_vel_limiter.h"
 
 namespace xyber_x1_infer::joy_stick_module {
 
@@ -18,6 +20,7 @@ struct TwistPub {
   std::vector<uint8_t> buttons;
   std::map<std::string, uint8_t> axis;
   aimrt::channel::PublisherRef pub;
+  aimrt::channel::PublisherRef pub_limiter;
 };
 
 struct ServiceClient {
@@ -34,16 +37,12 @@ class JoyStickModule : public aimrt::ModuleBase {
   [[nodiscard]] aimrt::ModuleInfo Info() const override {
     return aimrt::ModuleInfo{.name = "JoyStickModule"};
   }
-
   bool Initialize(aimrt::CoreRef core) override;
-
   bool Start() override;
-
   void Shutdown() override;
 
  private:
   auto GetLogger() { return core_.GetLogger(); }
-
   void MainLoop();
 
  private:
@@ -57,6 +56,7 @@ class JoyStickModule : public aimrt::ModuleBase {
   std::vector<FloatPub> float_pubs_;
   std::vector<TwistPub> twist_pubs_;
   std::vector<ServiceClient> srv_clients_;
+  std::shared_ptr<JoyVelLimiter> limiter_ = nullptr;
 
   uint32_t freq_{};
 };

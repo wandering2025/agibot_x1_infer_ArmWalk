@@ -25,7 +25,8 @@ target_link_libraries(
   PRIVATE aimrt::interface::aimrt_pkg_c_interface
           ${CUR_SUPERIOR_NAMESPACE}::dcu_driver_module
           ${CUR_SUPERIOR_NAMESPACE}::joy_stick_module
-          ${CUR_SUPERIOR_NAMESPACE}::rl_control_module)
+          ${CUR_SUPERIOR_NAMESPACE}::control_module
+          ${CUR_SUPERIOR_NAMESPACE}::sim_module)
 
 # Set installation of target
 set_property(TARGET ${CUR_TARGET_NAME} PROPERTY EXPORT_NAME ${CUR_TARGET_ALIAS_NAME})
@@ -36,3 +37,6 @@ install(
 
 # Set misc of target
 set_target_properties(${CUR_TARGET_NAME} PROPERTIES OUTPUT_NAME ${CUR_DIR})
+
+set_target_properties(${CUR_TARGET_NAME}
+    PROPERTIES INSTALL_RPATH "$ORIGIN/../lib")

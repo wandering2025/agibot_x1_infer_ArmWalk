@@ -47,6 +47,16 @@ bool JoyStickModule::Initialize(aimrt::CoreRef core) {
           publisher.axis = pub["axis"].as<std::map<std::string, uint8_t>>();
           publisher.pub = core_.GetChannelHandle().GetPublisher(publisher.topic_name);
           aimrt::channel::RegisterPublishType<geometry_msgs::msg::Twist>(publisher.pub);
+          if (pub["velocity_limit_lb"] && pub["velocity_limit_ub"]) {
+            publisher.pub_limiter = core_.GetChannelHandle().GetPublisher(publisher.topic_name + "_limiter");
+            aimrt::channel::RegisterPublishType<geometry_msgs::msg::Twist>(publisher.pub_limiter);
+
+            auto lb = pub["velocity_limit_lb"].as<std::vector<double>>();
+            auto ub = pub["velocity_limit_ub"].as<std::vector<double>>();
+            array_t lb_array = Eigen::Map<array_t>(lb.data(), lb.size());
+            array_t ub_array = Eigen::Map<array_t>(ub.data(), ub.size());
+            limiter_ = std::make_shared<JoyVelLimiter>(pub["axis"].size(), 1.0 / freq_, lb_array, ub_array);
+          }
           twist_pubs_.push_back(std::move(publisher));
         }
       }
@@ -108,26 +118,58 @@ void JoyStickModule::MainLoop() {
       for (auto button : twist_pub.buttons) {
         ret &= joy_data.buttons[button];
       }
-      if (ret) {
+      if (ret && limiter_) {
+        array_t target_pos;
+        target_pos.resize(joy_data.axis.size());
+        int32_t idx = 0;
+
         if (twist_pub.axis.find("linear-x") != twist_pub.axis.end()) {
           vel_msgs.linear.x = joy_data.axis[twist_pub.axis["linear-x"]];
+          target_pos[idx++] = joy_data.axis[twist_pub.axis["linear-x"]];
         }
         if (twist_pub.axis.find("linear-y") != twist_pub.axis.end()) {
           vel_msgs.linear.y = joy_data.axis[twist_pub.axis["linear-y"]];
+          target_pos[idx++] = joy_data.axis[twist_pub.axis["linear-y"]];
         }
         if (twist_pub.axis.find("linear-z") != twist_pub.axis.end()) {
           vel_msgs.linear.z = joy_data.axis[twist_pub.axis["linear-z"]];
+          target_pos[idx++] = joy_data.axis[twist_pub.axis["linear-z"]];
         }
         if (twist_pub.axis.find("angular-x") != twist_pub.axis.end()) {
           vel_msgs.angular.x = joy_data.axis[twist_pub.axis["angular-x"]];
+          target_pos[idx++] = joy_data.axis[twist_pub.axis["angular-x"]];
         }
         if (twist_pub.axis.find("angular-y") != twist_pub.axis.end()) {
           vel_msgs.angular.y = joy_data.axis[twist_pub.axis["angular-y"]];
+          target_pos[idx++] = joy_data.axis[twist_pub.axis["angular-y"]];
         }
         if (twist_pub.axis.find("angular-z") != twist_pub.axis.end()) {
           vel_msgs.angular.z = joy_data.axis[twist_pub.axis["angular-z"]];
+          target_pos[idx++] = joy_data.axis[twist_pub.axis["angular-z"]];
         }
         aimrt::channel::Publish<geometry_msgs::msg::Twist>(twist_pub.pub, vel_msgs);
+
+        array_t state = limiter_->update(target_pos);
+        idx = 0;
+        if (twist_pub.axis.find("linear-x") != twist_pub.axis.end()) {
+          vel_msgs.linear.x = state[idx++];
+        }
+        if (twist_pub.axis.find("linear-y") != twist_pub.axis.end()) {
+          vel_msgs.linear.y = state[idx++]; 
+        }
+        if (twist_pub.axis.find("linear-z") != twist_pub.axis.end()) {
+          vel_msgs.linear.z = state[idx++];
+        }
+        if (twist_pub.axis.find("angular-x") != twist_pub.axis.end()) {
+          vel_msgs.angular.x = state[idx++];
+        }
+        if (twist_pub.axis.find("angular-y") != twist_pub.axis.end()) {
+          vel_msgs.angular.y = state[idx++];
+        }
+        if (twist_pub.axis.find("angular-z") != twist_pub.axis.end()) {
+          vel_msgs.angular.z = state[idx++];
+        }
+        aimrt::channel::Publish<geometry_msgs::msg::Twist>(twist_pub.pub_limiter, vel_msgs);
       }
     }
 

@@ -32,7 +32,7 @@ aimrt:
         enable_backends: [local, ros2]
     sub_topics_options: # 为 subscribe topic 选择后端
       - topic_name: "(.*)"
-        enable_backends: [local, ros2]
+        enable_backends: [local]
   rpc: # rpc相关配置
     backends: # rpc后端配置
       - type: local
@@ -48,15 +48,15 @@ aimrt:
       - path: ./libpkg1.so
         enable_modules:
           - JoyStickModule
+          - ControlModule
           - DcuDriverModule
-          - RlControlModule
     modules: # 模块
       - name: JoyStickModule
         log_lvl: INFO
         cfg_file_path: ./cfg/joy_stick_module/joy_x1.yaml
+      - name: ControlModule
+        log_lvl: INFO
+        cfg_file_path: ./cfg/control_module/rl_x1.yaml
       - name: DcuDriverModule
         log_lvl: DEBUG
         cfg_file_path: ./cfg/dcu_driver_module/dcu_x1.yaml
-      - name: RlControlModule
-        log_lvl: INFO
-        cfg_file_path: ./cfg/rl_control_module/rl_x1.yaml

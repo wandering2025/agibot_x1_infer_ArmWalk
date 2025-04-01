@@ -106,13 +106,13 @@ Joy::~Joy() {
 }
 
 void Joy::GetJoyData(JoyStruct& joy_data) {
-  while (!is_update_.load()) {
-    std::this_thread::sleep_for(1ms);
-  }
+  // while (!is_update_.load()) {
+  //   std::this_thread::sleep_for(1ms);
+  // }
 
   std::lock_guard<std::mutex> lk(joy_msg_mutex_);
   joy_data = joy_msg_;
-  is_update_.store(false);
+  // is_update_.store(false);
 }
 
 float Joy::convertRawAxisValueToROS(int16_t val) {
