@@ -3,7 +3,17 @@
 #include <iostream>
 #include <fstream>  // 添加头文件以支持文件操作
 #include <iomanip>  // 用于格式化输出
+#include <ctime>  // 用于获取当前时间
+#include <sstream>  // 用于格式化时间戳
 
+// 生成当前时间戳的函数
+std::string GetTimestamp() {
+  std::time_t now = std::time(nullptr);
+  std::tm* local_time = std::localtime(&now);
+  std::ostringstream oss;
+  oss << std::put_time(local_time, "%Y-%m-%d-%H%M");
+  return oss.str();
+}
 
 namespace xyber_x1_infer::rl_control_module {
 
@@ -274,10 +284,11 @@ void RLController::ComputeActions() {
         out_file.close();
         std::cout << "StateAction_record_" << (file_count-1) << " saved." << std::endl;
       }
-      
+      // 获取当前时间戳
+      std::string timestamp = GetTimestamp();
       // 创建新文件名
       std::string filename = "/home/lx/projects/agibot_x1_infer_ArmWalk/src/module/control_module/StateAction_record_" + 
-                            std::to_string(file_count) + ".csv";
+                            std::to_string(file_count) + "_" + timestamp + ".csv";
       
       // 打开新文件
       out_file.open(filename, std::ios::out | std::ios::trunc);
