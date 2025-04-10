@@ -6,6 +6,7 @@
 
 #include "control_module/controller_base.h"
 #include "control_module/rotation_tools.h"
+#include <eigen3/Eigen/Dense>
 
 namespace xyber_x1_infer::rl_control_module {
 
@@ -21,6 +22,7 @@ class RLController : public ControllerBase {
   my_ros2_proto::msg::JointCommand GetJointCmdData() override;
 
  private:
+  Eigen::VectorXd latest_propri_obs_;  // 存储最新的观测值
   void LoadModel();
   void UpdateStateEstimation();
   void ComputeObservation();

@@ -1,6 +1,9 @@
 #include "control_module/rl_controller.h"
 #include <string.h>
 #include <iostream>
+#include <fstream>  // 添加头文件以支持文件操作
+#include <iomanip>  // 用于格式化输出
+
 
 namespace xyber_x1_infer::rl_control_module {
 
@@ -241,10 +244,13 @@ void RLController::ComputeObservation() {
                  [obs_min, obs_max](scalar_t x) { 
                    return std::max(obs_min, std::min(obs_max, x));
                  });
+  // 保存最新的 propri_obs 到成员变量
+  latest_propri_obs_ = propri_obs;
 }
 
 void RLController::ComputeActions() {
   // create input tensor object
+  //std::cout << "Action activated." << std::endl;
   std::vector<Ort::Value> input_tensor;
   input_tensor.push_back(Ort::Value::CreateTensor<float>(memory_info_, observations_.data(), observations_.size(), input_shapes_[0].data(),input_shapes_[0].size()));
 
@@ -253,13 +259,100 @@ void RLController::ComputeActions() {
   for (int i = 0; i < onnx_conf_.actions_size; ++i) {
     actions_[i] = *(output_values[0].GetTensorMutableData<float>() + i);
   }
+  
+  // 记录状态和动作数据
+  static int record_count = 0;       // 记录当前文件已记录步数
+  static int file_count = 0;         // 文件计数器
+  static std::ofstream out_file;     // 文件流对象
+
+  // 检查是否使用目标模型
+  if (onnx_conf_.policy_file == "cfg/control_module/policy/rl_walk_leg_shoulder.onnx") {
+    // 每1000步或首次需要创建新文件
+    if (record_count % 1000 == 0) {
+      // 关闭旧文件（如果有）
+      if (out_file.is_open()) {
+        out_file.close();
+        std::cout << "StateAction_record_" << (file_count-1) << " saved." << std::endl;
+      }
+      
+      // 创建新文件名
+      std::string filename = "/home/lx/projects/agibot_x1_infer_ArmWalk/src/module/control_module/StateAction_record_" + 
+                            std::to_string(file_count) + ".csv";
+      
+      // 打开新文件
+      out_file.open(filename, std::ios::out | std::ios::trunc);
+      if (!out_file.is_open()) {
+        std::cerr << "Failed to create record file: " << filename << std::endl;
+        return;
+      }
+      
+      // 写入表头
+      out_file << "timestep";
+      // 输入表头
+      for (int i = 0; i < onnx_conf_.actions_size; ++i) {
+        out_file << "," << joint_names_[i] << "_pos_diff";
+      }
+      for (int i = 0; i < onnx_conf_.actions_size; ++i) {
+        out_file << "," << joint_names_[i] << "_vel";
+      }
+      out_file << ",base_ang_vel_x,base_ang_vel_y,base_ang_vel_z";
+      out_file << ",base_euler_x,base_euler_y,base_euler_z";
+      // 输出表头
+      for (int i = 0; i < onnx_conf_.actions_size; ++i) {
+        out_file << "," << joint_names_[i] << "_action";
+      }
+      out_file << "\n";
+      
+      std::cout << "New record_file created: " << filename << std::endl;
+      file_count++;
+      record_count = 0;  // 新文件从0开始计数
+    }
+
+    // 记录数据
+    if (out_file.is_open()) {
+      // 写入当前时间步的数据
+      out_file << record_count;
+      // 输入数据：从 latest_propri_obs_ 中提取所需部分
+      // 关节位置偏差 (action_size)
+      int offset = 5;
+      for (int i = 0; i < onnx_conf_.actions_size; ++i) {
+        out_file << "," << std::fixed << std::setprecision(6) << latest_propri_obs_[offset+i];
+      }
+      // 关节速度 (action_size)
+      offset += onnx_conf_.actions_size;
+      for (int i = 0; i < onnx_conf_.actions_size; ++i) {
+        out_file << "," << std::fixed << std::setprecision(6) << latest_propri_obs_[offset + i];
+      }
+      // 基座角速度 (3)
+      offset += onnx_conf_.actions_size + onnx_conf_.actions_size;  // 跳过last_actions
+      for (int i = 0; i < 3; ++i) {
+        out_file << "," << std::fixed << std::setprecision(6) << latest_propri_obs_[offset + i];
+      }
+      // 基座欧拉角 (3)
+      offset += 3;
+      for (int i = 0; i < 3; ++i) {
+        out_file << "," << std::fixed << std::setprecision(6) << latest_propri_obs_[offset + i];
+      }
+      // 输出数据：actions_
+      for (int i = 0; i < onnx_conf_.actions_size; ++i) {
+        out_file << "," << std::fixed << std::setprecision(6) << actions_[i];
+      }
+      out_file << "\n";
+      
+      record_count++;
+    }
+  } else if (out_file.is_open()) {
+    // 如果切换了模型但之前正在记录，确保文件关闭
+    out_file.close();
+    std::cout << "StateAction_record_" << (file_count-1) << " saved." << std::endl;
+  }
+
   // limit action range
   scalar_t action_min = -onnx_conf_.actions_clip;
   scalar_t action_max = onnx_conf_.actions_clip;
   std::transform(actions_.begin(), actions_.end(), actions_.begin(),
-                 [action_min, action_max](scalar_t x) {
-                   return std::max(action_min, std::min(action_max, x));
-                 });
+                [action_min, action_max](scalar_t x) {
+                  return std::max(action_min, std::min(action_max, x));
+                });
 }
-
 } // namespace xyber_x1_infer::
