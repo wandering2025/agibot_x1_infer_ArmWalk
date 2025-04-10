@@ -4,3 +4,13 @@
 _deps/
 build/
 cmake-build*/
+*.vsidx
+*.wsuo
+*.db
+*.shm
+*.wal
+*.opendb
+*.json
+*.ipch
+*.sqlite
+.vs/*
