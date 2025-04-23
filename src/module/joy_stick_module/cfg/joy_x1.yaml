@@ -15,6 +15,10 @@ float_pubs:
     buttons: [6]
   - topic_name: /plan_mode
     buttons: [5]
+  - topic_name: /squat_mode
+    buttons: [9]
+  - topic_name: /hug_mode
+    buttons: [10]
 
 # Twist twist
 #         Vector3  linear

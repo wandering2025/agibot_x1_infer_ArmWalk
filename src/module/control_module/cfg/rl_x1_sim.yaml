@@ -22,13 +22,24 @@ robot_states:
   # 零模式
   zero:
     trigger_topic: /zero_mode
-    pre_states: [idle, keep, stand, stand_&_plan]
+    pre_states: [idle, keep, stand, stand_&_plan, squat, hug]
     controllers: [pd_zero]
   # 站立模式
   stand:
     trigger_topic: /stand_mode
-    pre_states: [zero, stand_&_plan, keep_&_plan, walk_leg_&_plan, walk_leg, walk_leg_arm]
+    pre_states: [zero, stand_&_plan, keep_&_plan, walk_leg_&_plan, walk_leg, walk_leg_arm, squat, hug]
     controllers: [pd_zero, pd_stand]
+  # 蹲模式
+  squat:
+    trigger_topic: /squat_mode
+    pre_states: [zero, stand, squat, stand_&_plan, hug]
+    controllers: [pd_zero, pd_hug, pd_squat]
+  # 抱模式
+  hug:
+    trigger_topic:  /hug_mode
+    pre_states: [zero, stand, hug, stand_&_plan]
+    controllers: [pd_zero, pd_hug]
+
 
   # 行走模式1
   walk_leg:
@@ -44,7 +55,7 @@ robot_states:
   # plan模式
   stand_&_plan:
     trigger_topic: /plan_mode
-    pre_states: [stand, stand_&_plan]
+    pre_states: [stand, stand_&_plan, squat, hug]
     controllers: [pd_zero, pd_stand, pd_plan]
   keep_&_plan:
     trigger_topic: /plan_mode
@@ -60,7 +71,7 @@ robot_states:
 # ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ joint_list ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 joint_list:
   - lumbar_yaw_joint
-  - lumbar_roll_joint 
+  - lumbar_roll_joint
   - lumbar_pitch_joint
   - left_shoulder_pitch_joint
   - left_shoulder_roll_joint
@@ -183,19 +194,19 @@ controllers:
                 right_hip_pitch_joint, right_hip_roll_joint, right_hip_yaw_joint, right_knee_pitch_joint, right_ankle_pitch_joint, right_ankle_roll_joint]
     init_state: [0.0,   0.0,   0.0,
                  0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0,
-                 0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0,  
-                 0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   
+                 0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0,
+                 0.0,   0.0,   0.0,   0.0,   0.0,   0.0,
                  0.0,   0.0,   0.0,   0.0,   0.0,   0.0]
     stiffness:  [700.0, 700.0, 700.0,
                  300.0, 300.0, 30.0,  300.0, 30.0,  30.0,  30.0,
                  300.0, 300.0, 30.0,  300.0, 30.0,  30.0,  30.0,
-                 250.0, 250.0, 250.0, 250.0, 200.0, 100.0,
-                 250.0, 250.0, 250.0, 250.0, 200.0, 100.0]
-    damping:    [0.6,   0.6,   0.6,
+                 350.0, 350.0, 350.0, 350.0, 450.0, 100.0,
+                 350.0, 350.0, 350.0, 350.0, 450.0, 100.0]
+    damping:    [3.0,   3.0,   3.0,
                  0.6,   0.6,   0.1,   0.6,   0.1,   0.1,   0.1,
                  0.6,   0.6,   0.1,   0.6,   0.1,   0.1,   0.1,
-                 0.4,   0.4,   0.4,   0.4,   0.6,   0.3,
-                 0.4,   0.4,   0.4,   0.4,   0.6,   0.3]
+                 1.0,   1.0,   1.0,   1.0,   1.5,   0.3,
+                 1.0,   1.0,   1.0,   1.0,   1.5,   0.3]
 
   # stand
   pd_stand:
@@ -216,7 +227,34 @@ controllers:
                  0.4,   0.4,   0.4,   0.4,   0.6,
                  0.4,   0.4,   0.4,   0.4,   0.6]
 
-  # plan
+
+  #squat
+  pd_squat:
+         joint_list: [lumbar_pitch_joint, left_shoulder_pitch_joint, left_shoulder_roll_joint, left_shoulder_yaw_joint, left_elbow_pitch_joint, left_wrist_roll_joint]
+         init_state: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+         stiffness: [300.0, 300.0,300.0, 30.0, 300.0, 30.0]
+         damping: [0.6, 0.6, 0.6, 0.1, 0.6, 0.1]
+         plan_conf:
+           trajectory_interpolator: [[1.5, 0.05, -3.0, 0.0, -1.5, 0.0, 0.0],
+                                     [1.0, 0.0, -3.0, 0.0, -1.5, 0.0, 0.0],
+                                     [1.0, 0.0, -3.0, 0.0, -1.5, 0.0, 0.0],
+                                     [1.0, 0.0, -3.0, 0.0, -1.5, 0.0, 0.0],
+                                     [1.5, 0.0, -3.0, 0.3, -1.5, 0.5, -0.7],
+                                     [1.5, 0.0, -3.0, -0.3, -1.5, -0.5, 0.7],
+                                     [1.5, 0.0, -3.0, 0.3, -1.5, 0.5, -0.7],
+                                     [1.5, 0.0, -3.0, -0.3, -1.5, -0.5, 0.7],
+                                     [1.5, 0.0, -3.0, 0.3, -1.5, 0.5, -0.7]]
+  pd_hug:
+    joint_list: [right_shoulder_pitch_joint, right_shoulder_roll_joint, right_shoulder_yaw_joint, right_elbow_pitch_joint]
+    init_state: [0.0, 0.0, 0.0, 0.0]
+    stiffness: [300.0, 300.0, 30.0, 300.0]
+    damping: [0.6, 0.6, 0.1, 0.6]
+    plan_conf:
+      trajectory_interpolator: [[1.0, 0.5, -0.25, 0.0, 0.0],
+                                [1.0, 0.5, -0.25, -1.5, 1.0],
+                                [10.0, 0.5, -0.25, -1.5, 1.0],
+                                [1.0, 0.5, -0.25, -1.5, 1.0]]
+
   pd_plan:
     joint_list: [right_shoulder_pitch_joint, right_shoulder_yaw_joint, right_elbow_pitch_joint]
     init_state: [0.0,   0.0,  0.0]
