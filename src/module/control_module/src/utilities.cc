@@ -1,5 +1,4 @@
 #include "control_module/utilities.h"
-#include <stdio.h>
 
 // 节流器
 bool Throttler(const time_point<high_resolution_clock> now, time_point<high_resolution_clock> &last, const milliseconds interval) {
