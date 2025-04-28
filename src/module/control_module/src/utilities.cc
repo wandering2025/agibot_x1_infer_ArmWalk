@@ -127,16 +127,30 @@ std::vector<std::vector<double>> Interpolator::RuckigInterpolate(std::vector<dou
   ruckig::Ruckig<ruckig::DynamicDOFs> otg(start.size(), 1.0 / 1000.0);
   ruckig::InputParameter<ruckig::DynamicDOFs> input(start.size());
   ruckig::OutputParameter<ruckig::DynamicDOFs> output(start.size());
-
   input.current_position = start;
-  input.current_velocity = {0.0, 0.0, 0.0};
-  input.current_acceleration = {0.0, 0.0, 0.0};
+
+  input.current_velocity = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  input.current_acceleration = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
   input.target_position = end;
-  input.target_velocity = {0.0, 0.0, 0.0};
-  input.target_acceleration = {0.0, 0.0, 0.0};
-  input.max_velocity = {3.0, 3.0, 3.0};
-  input.max_acceleration = {20.0, 20.0, 20.0};
-  input.max_jerk = {20.0, 20.0, 20.0};
+  input.target_velocity = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  input.target_acceleration = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  input.max_velocity = {3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+                        3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+                        3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0};
+  input.max_acceleration = {20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0,
+                            20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0,
+                            20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0};
+  input.max_jerk = {20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0,
+                    20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0,
+                    20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0};
   input.minimum_duration = duration;
 
   while (otg.update(input, output) == ruckig::Result::Working) {

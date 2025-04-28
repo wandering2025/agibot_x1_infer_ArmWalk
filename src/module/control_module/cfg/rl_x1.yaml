@@ -29,6 +29,16 @@ robot_states:
     trigger_topic: /stand_mode
     pre_states: [zero, stand_&_plan, keep_&_plan, walk_leg_&_plan, walk_leg, walk_leg_arm]
     controllers: [pd_zero, pd_stand]
+  # 蹲模式
+  squat:
+    trigger_topic: /squat_mode
+    pre_states: [zero, stand, squat, stand_&_plan, hug]
+    controllers: [pd_zero, pd_hug, pd_squat]
+  # 抱模式
+  hug:
+    trigger_topic: /hug_mode
+    pre_states: [zero, stand, hug, stand_&_plan]
+    controllers: [pd_zero, pd_hug]
 
   # 行走模式1
   walk_leg:
@@ -214,6 +224,35 @@ controllers:
                  1.5,   1.5,   1.5,
                  5.0,   5.0,   5.0,   5.0,   5.0,
                  5.0,   5.0,   5.0,   5.0,   5.0  ]
+   
+  # squat
+  pd_squat:
+    joint_list: [lumbar_pitch_joint, left_shoulder_pitch_joint, left_shoulder_roll_joint, left_shoulder_yaw_joint, left_elbow_pitch_joint, left_wrist_roll_joint]
+    init_state: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    stiffness:  [500.0, 80.0, 80.0, 80.0, 80.0, 80.0]
+    damping: [5.0, 1.5, 1.5, 1.5, 1.5, 1.5]
+    plan_conf:
+      trajectory_interpolator: [[1.5, 0.05, -3.0, 0.0, -1.5, 0.0, 0.0],
+                                [1.0, 0.0, -3.0, 0.0, -1.5, 0.0, 0.0],
+                                [1.0, 0.0, -3.0, 0.0, -1.5, 0.0, 0.0],
+                                [1.0, 0.0, -3.0, 0.0, -1.5, 0.0, 0.0],
+                                [1.5, 0.0, -3.0, 0.3, -1.5, 0.5, -0.7],
+                                [1.5, 0.0, -3.0, -0.3, -1.5, -0.5, 0.7],
+                                [1.5, 0.0, -3.0, 0.3, -1.5, 0.5, -0.7],
+                                [1.5, 0.0, -3.0, -0.3, -1.5, -0.5, 0.7],
+                                [1.5, 0.0, -3.0, 0.3, -1.5, 0.5, -0.7]]
+
+  # hug
+  pd_hug:
+    joint_list: [right_shoulder_pitch_joint, right_shoulder_roll_joint, right_shoulder_yaw_joint, right_elbow, pitch_joint]
+    init_state: [0.0, 0.0, 0.0, 0.0]
+    stiffness: [80.0, 80.0, 80.0, 80.0]
+    damping: [1.5, 1.5, 1.5, 1.5]
+    plan_conf:
+      trajectory_interpolator: [[1.0, 0.5, -0.25, 0.0, 0.0],
+                                [1.0, 0.5, -0.25, -1.5, 1.0],
+                                [10.0, 0.5, -0.25, -1.5, 1.0],
+                                [1.0, 0.5, -0.25, -1.5, 1.0]]
 
   # plan
   pd_plan:
